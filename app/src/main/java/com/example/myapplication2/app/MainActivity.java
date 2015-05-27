@@ -56,7 +56,7 @@ public class MainActivity extends ActionBarActivity {
 
         } else {
             new GetJsonAndFillSpinner().execute("http://www.freecurrencyconverterapi.com/api/v3/currencies");
-
+            /*
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -79,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
                 public void onNothingSelected(AdapterView<?> adapterView) {
 
                 }
-            });
+            });*/
 
             editText.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -113,7 +113,8 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public boolean onKey(View view, int i, KeyEvent keyEvent) {
                     if((keyEvent.getAction()==KeyEvent.ACTION_DOWN) && (i==KeyEvent.KEYCODE_ENTER)){
-                        textView.setText(spinner.getSelectedItem().toString() + " to " + spinner2.getSelectedItem());
+                        //textView.setText(spinner.getSelectedItem().toString() + " to " + spinner2.getSelectedItem());
+                        textView.setText("Exchanging...");
                         requestExchangeJson(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), currencyValue);
                         return true;
                     }
@@ -176,7 +177,11 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Double exchangedValue){
-            textView.setText(exchangedValue.toString());
+            double dexchangeValue = exchangedValue.doubleValue();
+            if(dexchangeValue == (long)dexchangeValue)
+            textView.setText(String.format("%d", (long) dexchangeValue));
+        else
+            textView.setText(String.format("%s", dexchangeValue));
         }
     }
     private class GetJsonAndFillSpinner extends AsyncTask<String, Void, Void>{
@@ -232,7 +237,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void fillSpinners(String[] spinnerContents){
         Arrays.sort(spinnerContents);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinnerContents);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, spinnerContents);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner2.setAdapter(adapter);
