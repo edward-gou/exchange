@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">My Application 2</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">Exchange</string>
     <string name="action_settings">Settings</string>
-
-    <string-array name="spinnerItems">
-        <item>CAD</item>
-        <item>USD</item>
-        <item>EURO</item>
-        <item>YUAN</item>
-    </string-array>
 
 </resources>
