@@ -39,7 +39,7 @@ public class MainActivity extends ActionBarActivity {
     Spinner spinner;
     Spinner spinner2;
     HashMap<String, Currency> currencyHashMap = new HashMap<>();
-    HashMap<List<String>, Currency> exchangeHashMap = new HashMap<>();
+    HashMap<String, Double> exchangeHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,8 @@ public class MainActivity extends ActionBarActivity {
         {
 
         } else {
-            new GetJsonAndFillSpinner().execute("http://www.freecurrencyconverterapi.com/api/v3/currencies");
+            new GetExchangeRates().execute("http://www.apilayer.net/api/live?access_key=47eadc66aed537b770c152eb71e93caf");
+            //new GetJsonAndFillSpinner().execute("http://www.freecurrencyconverterapi.com/api/v3/currencies");
             /*
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -116,8 +117,15 @@ public class MainActivity extends ActionBarActivity {
                 public boolean onKey(View view, int i, KeyEvent keyEvent) {
                     if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (i == KeyEvent.KEYCODE_ENTER)) {
                         //textView.setText(spinner.getSelectedItem().toString() + " to " + spinner2.getSelectedItem());
-                        textView.setText("Exchanging...");
-                        requestExchangeJson(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), currencyValue);
+                        //textView.setText("Exchanging...");
+                        //requestExchangeJson(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), currencyValue);
+                        double fromValue = exchangeHashMap.get(spinner.getSelectedItem().toString());
+                        double toValue = exchangeHashMap.get(spinner2.getSelectedItem().toString());
+                        double value = Double.parseDouble(editText.getText().toString())*toValue/fromValue;
+                        if(value == (long) value)
+                            textView.setText(String.format("%d", (long) value));
+                        else
+                            textView.setText(String.format("%s", value));
                         return true;
                     }
                     return false;
@@ -127,14 +135,21 @@ public class MainActivity extends ActionBarActivity {
             buttonView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    textView.setText("Exchanging...");
-                    requestExchangeJson(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), currencyValue);
+                    //textView.setText("Exchanging...");
+                    //requestExchangeJson(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), currencyValue);
+                    double fromValue = exchangeHashMap.get(spinner.getSelectedItem().toString());
+                    double toValue = exchangeHashMap.get(spinner2.getSelectedItem().toString());
+                    double value = Double.parseDouble(editText.getText().toString())*toValue/fromValue;
+                    if(value == (long) value)
+                        textView.setText(String.format("%d", (long) value));
+                    else
+                        textView.setText(String.format("%s", value));
                 }
             });
         }
     }
 
-
+/*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -156,7 +171,8 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    */
+/*
     public void requestExchangeJson(String fromId, String toId, double value) {
         new GetJsonAndExchange().execute(new RequestParams("http://www.freecurrencyconverterapi.com/api/v3/convert?q=" + fromId + "_" + toId + "&compact=ultra", value));
     }
@@ -169,8 +185,35 @@ public class MainActivity extends ActionBarActivity {
             urlString = u;
             value = v;
         }
-    }
+    }*/
 
+    private class GetExchangeRates extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                JSONObject json = urlToJson(strings[0]).getJSONObject("quotes");
+                System.out.print(json.toString());
+                Iterator<?> keys = json.keys();
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
+                    System.out.println("b");
+                    exchangeHashMap.put(key.substring(3), json.getDouble(key));
+                    System.out.println(key + " " + exchangeHashMap.get(key.substring(3)));
+                }
+                exchangeHashMap.put("USD", 1.0);
+            } catch (org.json.JSONException e){
+                System.out.println(e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v){
+            fillSpinners(exchangeHashMap.keySet().toArray(new String[0]));
+        }
+    }
+/*
     private class GetJsonAndExchange extends AsyncTask<RequestParams, Void, Double>{
 
         @Override
@@ -189,9 +232,9 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(Double exchangedValue){
             double dexchangeValue = exchangedValue.doubleValue();
             if(dexchangeValue == (long)dexchangeValue)
-            textView.setText(String.format("%d", (long) dexchangeValue));
-        else
-            textView.setText(String.format("%s", dexchangeValue));
+                textView.setText(String.format("%d", (long) dexchangeValue));
+            else
+                textView.setText(String.format("%s", dexchangeValue));
         }
     }
     private class GetJsonAndFillSpinner extends AsyncTask<String, Void, Void>{
@@ -218,7 +261,7 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(Void v){
             fillSpinners(currencyHashMap.keySet().toArray(new String[0]));
         }
-    }
+    }*/
 
     public JSONObject urlToJson(String urlString){
         try{
